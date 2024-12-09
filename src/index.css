@@ -1,5 +1,6 @@
 :root {
   --background-color: #0f171c;
+  --secondary-color: #0be7a3;
 }
 
 * {
@@ -19,4 +20,23 @@ body {
 
 button {
   font-family: inherit;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: #000;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-secondary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

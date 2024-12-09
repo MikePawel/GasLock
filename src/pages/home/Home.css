@@ -1,38 +1,85 @@
 .container {
-  width: 100%;
-  min-height: calc(100vh - 70px);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 4rem 2rem;
+  padding: 2rem;
 }
 
 .content {
-  width: 100%;
-  max-width: 600px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
 }
 
 .connect-section {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
 }
 
 .wallet-info {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 800px;
+  background: var(--background-secondary);
+  padding: 1.5rem;
   border-radius: 8px;
+  color: var(--text-primary);
 }
 
 .wallet-info p {
   margin: 0.5rem 0;
-  color: #fff;
+  font-size: 1rem;
+}
+
+.form-toggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: var(--background-tertiary);
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.toggle-button {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.toggle-button:hover {
+  color: var(--text-primary);
+}
+
+.toggle-button.active {
+  background: var(--primary-color);
+  color: var(--text-dark);
+}
+
+.toggle-button.active:hover {
+  background: var(--primary-color-hover);
+  color: var(--text-dark);
+}
+
+:root {
+  --background-tertiary: #141920;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-dark: #000000;
+  --primary-color: #0be7a3;
+  --primary-color-hover: #09c68c;
 }

@@ -4,7 +4,11 @@ import "./index.css";
 import App from "./App.tsx";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  getDefaultConfig,
+  RainbowKitProvider,
+  darkTheme,
+} from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
@@ -36,7 +40,16 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider initialChain={47763}>
+        <RainbowKitProvider
+          theme={darkTheme({
+            accentColor: "#0be7a3",
+            accentColorForeground: "black",
+            borderRadius: "small",
+            fontStack: "system",
+            overlayBlur: "small",
+          })}
+          initialChain={47763}
+        >
           <App />
         </RainbowKitProvider>
       </QueryClientProvider>
