@@ -1,8 +1,12 @@
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import { abi } from "../../assets/abi";
 import { useState, useEffect } from "react";
 import "./ReadLock.css";
-import { formatTimeUnits } from "../../utils/timeUtils";
 
 type TimeRemaining = {
   days: number;
@@ -31,33 +35,38 @@ export default function ReadLock() {
   const { address } = useAccount();
   const [invalidLockId, setInvalidLockId] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [shouldFetchWithdrawable, setShouldFetchWithdrawable] = useState(false);
 
-  const { data: lockInfoData, refetch } = useReadContract({
+  const { data: lockInfoData, refetch: refetchLockInfo } = useReadContract({
     abi,
     address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
     functionName: "getLockInfo",
     args: lockId ? [lockId] : undefined,
   });
 
-  const { data: withdrawableData } = useReadContract({
-    abi,
-    address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
-    functionName: "calculateWithdrawableAmount",
-    args: lockId ? [lockId] : undefined,
-  });
+  const { data: withdrawableDataResponse, refetch: refetchWithdrawable } =
+    useReadContract({
+      abi,
+      address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
+      functionName: "calculateWithdrawableAmount",
+      args: shouldFetchWithdrawable ? [lockId] : undefined,
+    });
 
   useEffect(() => {
-    if (withdrawableData) {
-      setWithdrawableAmount(withdrawableData);
+    if (withdrawableDataResponse) {
+      setWithdrawableAmount(withdrawableDataResponse);
     }
-  }, [withdrawableData]);
+  }, [withdrawableDataResponse]);
 
   const handleGetInfo = async () => {
     if (!lockId) return;
 
     setLoading(true);
-    const result = await refetch();
-    const data = result.data as [
+    const lockInfoResult = await refetchLockInfo();
+
+    const withdrawableResult = await refetchWithdrawable();
+
+    const lockInfoData = lockInfoResult.data as [
       string,
       string,
       bigint,
@@ -66,26 +75,37 @@ export default function ReadLock() {
       number,
       bigint
     ];
-    setLockInfo(data);
+    setLockInfo(lockInfoData);
 
-    if (!data || data[0] === "") {
+    try {
+      setWithdrawableAmount(withdrawableResult.data);
+    } catch {
+      console.log("error");
+    }
+
+    if (!lockInfoData || lockInfoData[0] === "") {
       setInvalidLockId(true);
     } else {
       setInvalidLockId(false);
     }
+
+    setShouldFetchWithdrawable(true);
     setLoading(false);
   };
 
   const { data: hash, isPending, writeContract } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
 
   const handleWithdraw = async (lockId: string) => {
     try {
-      await writeContract({
+      const txHash = await writeContract({
         address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
         abi,
         functionName: "withdraw",
         args: [lockId],
       });
+      console.log("Transaction Hash:", txHash);
     } catch (error) {
       console.error("Transaction failed:", error);
     }
@@ -283,6 +303,54 @@ export default function ReadLock() {
         >
           Withdraw
         </button>
+      )}
+
+      {hash && (
+        <div className="transaction-status">
+          <div className="transaction-steps">
+            <div className={`step ${hash ? "active completed" : ""}`}>
+              <div className="step-indicator">1</div>
+              <div className="step-content">
+                <h4>Transaction Submitted</h4>
+                <div className="transaction-hash">
+                  <span>Hash: </span>
+                  <a
+                    href={`https://xexplorer.neo.org/tx/${hash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {hash.slice(0, 6)}...{hash.slice(-4)}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`step ${isConfirming ? "active" : ""} ${
+                isConfirmed ? "completed" : ""
+              }`}
+            >
+              <div className="step-indicator">2</div>
+              <div className="step-content">
+                <h4>Confirming Transaction</h4>
+                {isConfirming && (
+                  <div className="loading-spinner">
+                    <div className="spinner"></div>
+                    <span>Waiting for confirmation...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className={`step ${isConfirmed ? "active completed" : ""}`}>
+              <div className="step-indicator">3</div>
+              <div className="step-content">
+                <h4>Transaction Confirmed</h4>
+                {isConfirmed && <span>Transaction confirmed.</span>}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {invalidLockId && (
