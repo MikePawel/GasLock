@@ -3,6 +3,9 @@ pragma solidity ^0.8.0;
 
 contract GasLock {
     enum UnlockSchedule { Hourly, Daily, Weekly, Monthly, Yearly, Deadline }
+
+    event Debug(string message, uint256 value);
+
     
     struct LockInfo {
         address creator;
@@ -36,7 +39,8 @@ contract GasLock {
     function createLock(
     uint256 _unlockTimestamp,
     UnlockSchedule _schedule,
-    address _recipient) external payable returns (bytes32) {
+    address _recipient
+) external payable returns (bytes32) {
     require(msg.value > 0, "Amount must be greater than 0");
     require(_unlockTimestamp > block.timestamp, "Unlock time must be in the future");
     require(uint256(_schedule) <= uint256(UnlockSchedule.Deadline), "Invalid schedule");
@@ -71,8 +75,10 @@ contract GasLock {
         _schedule
     );
 
+    emit Debug("Lock created", block.timestamp);
     return lockId;
 }
+
 
     
     function getLockInfo(bytes32 _lockId) external view returns (
@@ -134,7 +140,7 @@ contract GasLock {
         uint256 amountPerPeriod = lock.amount / amountOfPeriods;
 
         // payout per period
-        uint256 payoutPerPeriod = lock.amount / amountPerPeriod;
+        // uint256 payoutPerPeriod = lock.amount / amountPerPeriod;
 
         
         // How many periods in time passed?
@@ -159,7 +165,7 @@ contract GasLock {
             return 0;
         }
 
-        uint256 totalPayoutUntilToday = payoutPerPeriod * amountOfEligiblePayouts;
+        uint256 totalPayoutUntilToday = amountPerPeriod * amountOfEligiblePayouts;
         if ((lock.amount -lock.remainingAmount) <= totalPayoutUntilToday ){
             return (totalPayoutUntilToday - (lock.amount -lock.remainingAmount));
         }

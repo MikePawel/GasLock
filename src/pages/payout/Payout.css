@@ -1,0 +1,33 @@
+/* Copy all styles from Locking.css */
+/* Add new styles for recipient address input */
+
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-input);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-shadow: var(--input-shadow);
+}
+
+.form-group input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(11, 231, 163, 0.2);
+}
+
+.form-group input[type="text"]:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--hover-shadow);
+}
+
+.form-group input[type="text"]:invalid {
+  border-color: var(--border-color);
+}
+
+.form-group input[type="text"]:not(:placeholder-shown):invalid {
+  border-color: #ff4d4d;
+}

@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Locking.css";
+import {
+  useAccount,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { abi } from "../../assets/abi";
 
 interface LockingFormData {
-  lockTitle: string;
   amount: string;
   lockDate: string;
-  unlockSchedule: "Yearly" | "Monthly" | "Weekly" | "Daily" | "Hourly";
-  cancelAuthority: "None" | "Owner" | "Both";
+  unlockSchedule:
+    | "Yearly"
+    | "Monthly"
+    | "Weekly"
+    | "Daily"
+    | "Hourly"
+    | "No Vesting";
 }
 
 interface TimeRemaining {
@@ -23,13 +33,22 @@ interface LockingProps {
   };
 }
 
-export default function Locking({ balance }: LockingProps) {
+const SCHEDULE_TO_NUMBER = {
+  "No Vesting": 5,
+  Hourly: 0,
+  Daily: 1,
+  Weekly: 2,
+  Monthly: 3,
+  Yearly: 4,
+} as const;
+
+export default function Locking({
+  balance,
+}: LockingProps & { address?: string }) {
   const [formData, setFormData] = useState<LockingFormData>({
-    lockTitle: "",
     amount: "",
     lockDate: new Date().toISOString().slice(0, 16),
-    unlockSchedule: "Yearly",
-    cancelAuthority: "None",
+    unlockSchedule: "No Vesting",
   });
 
   const [scheduleInfo, setScheduleInfo] = useState({
@@ -44,6 +63,18 @@ export default function Locking({ balance }: LockingProps) {
 
   const datePickerRef = useRef<HTMLInputElement>(null);
 
+  const { data: hash, isPending, writeContract } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    data: receipt,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const { address, isConnected } = useAccount();
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -52,23 +83,6 @@ export default function Locking({ balance }: LockingProps) {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const calculateDaysUntilUnlock = (unlockSchedule: string): number => {
-    switch (unlockSchedule) {
-      case "Hourly":
-        return 1 / 24; // fraction of a day
-      case "Daily":
-        return 1;
-      case "Weekly":
-        return 7;
-      case "Monthly":
-        return 30;
-      case "Yearly":
-        return 365;
-      default:
-        return 0;
-    }
   };
 
   const getUnlockRateDisplay = () => {
@@ -152,51 +166,30 @@ export default function Locking({ balance }: LockingProps) {
     }
   }, [formData.amount, formData.lockDate, formData.unlockSchedule]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Current timestamp for lock date
-    const lockTimestamp = Math.floor(Date.now() / 1000);
+    if (!address) {
+      console.error("No wallet connected");
+      return;
+    }
 
-    // Selected date for unlock date
     const unlockTimestamp = Math.floor(
       new Date(formData.lockDate).getTime() / 1000
     );
+    const scheduleNumber = SCHEDULE_TO_NUMBER[formData.unlockSchedule];
 
-    // Calculate unlock rate based on schedule and amount
-    const calculateUnlockRate = () => {
-      if (!formData.amount || !timeRemaining) return "0";
-
-      const amount = parseFloat(formData.amount);
-      const totalSeconds = unlockTimestamp - lockTimestamp;
-
-      switch (formData.unlockSchedule) {
-        case "Hourly":
-          return (amount / (totalSeconds / 3600)).toString();
-        case "Daily":
-          return (amount / (totalSeconds / 86400)).toString();
-        case "Weekly":
-          return (amount / (totalSeconds / 604800)).toString();
-        case "Monthly":
-          return (amount / (totalSeconds / 2592000)).toString();
-        case "Yearly":
-          return (amount / (totalSeconds / 31536000)).toString();
-        default:
-          return "0";
-      }
-    };
-
-    const lockData = {
-      title: formData.lockTitle,
-      amount: formData.amount,
-      lockTimestamp,
-      unlockTimestamp,
-      unlockRate: calculateUnlockRate(),
-      unlockSchedule: formData.unlockSchedule,
-      cancelAuthority: formData.cancelAuthority,
-    };
-
-    console.log("Lock created:", lockData);
+    try {
+      await writeContract({
+        address: "0x936c839F678AAfda8d8e8a0FBEA4b363eF7D9926",
+        abi,
+        functionName: "createLock",
+        args: [BigInt(unlockTimestamp), scheduleNumber, address],
+        value: BigInt(parseFloat(formData.amount) * 1e18),
+      });
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
   };
 
   const handleDateButtonClick = () => {
@@ -296,22 +289,63 @@ export default function Locking({ balance }: LockingProps) {
     return date.toLocaleDateString();
   };
 
+  // Extract lock ID from receipt logs
+  const getLockIdFromReceipt = () => {
+    if (!receipt) return null;
+    // Look specifically at the first log (index 0)
+    const lockCreatedLog = receipt.logs[0];
+    // Return the second topic which contains the lockId
+    return lockCreatedLog?.topics[1] || null;
+  };
+
+  useEffect(() => {
+    if (isConfirmed && receipt) {
+      console.log("Transaction confirmed!");
+      console.log("Transaction receipt:", receipt);
+
+      // Get the first log which contains our event
+      const lockCreatedLog = receipt.logs[0];
+      if (lockCreatedLog) {
+        const lockId = lockCreatedLog.topics[1];
+        const creator = `0x${lockCreatedLog.topics[2].slice(26)}`;
+        const recipient = `0x${lockCreatedLog.topics[3].slice(26)}`;
+
+        // Parse the data field
+        const decodedData = {
+          amount: BigInt(lockCreatedLog.data.slice(0, 66)),
+          unlockTimestamp: BigInt(`0x${lockCreatedLog.data.slice(66, 130)}`),
+          schedule: parseInt(lockCreatedLog.data.slice(130), 16),
+        };
+
+        // Create a reverse mapping for schedule numbers to names
+        const SCHEDULE_NUMBER_TO_NAME = {
+          0: "Hourly",
+          1: "Daily",
+          2: "Weekly",
+          3: "Monthly",
+          4: "Yearly",
+          5: "No Vesting",
+        } as const;
+
+        console.log("Lock Created Event Data:", {
+          lockId,
+          creator,
+          recipient,
+          amount: decodedData.amount.toString(),
+          unlockTimestamp: new Date(
+            Number(decodedData.unlockTimestamp) * 1000
+          ).toLocaleString(),
+          schedule:
+            SCHEDULE_NUMBER_TO_NAME[
+              decodedData.schedule as keyof typeof SCHEDULE_NUMBER_TO_NAME
+            ],
+        });
+      }
+    }
+  }, [isConfirmed, receipt]);
+
   return (
     <form className="locking-form" onSubmit={handleSubmit}>
-      <div className="form-group">
-        <div className="input-header">
-          <label htmlFor="lockTitle">Lock Title</label>
-        </div>
-        <input
-          type="text"
-          id="lockTitle"
-          name="lockTitle"
-          placeholder="eg: Team Tokens"
-          value={formData.lockTitle}
-          onChange={handleInputChange}
-        />
-      </div>
-
       <div className="form-group">
         <div className="input-header">
           <label htmlFor="amount">Lock Amount</label>
@@ -326,6 +360,9 @@ export default function Locking({ balance }: LockingProps) {
           placeholder="Amount in GAS"
           value={formData.amount}
           onChange={handleInputChange}
+          required
+          min="0"
+          step="0.0000000001"
         />
       </div>
 
@@ -363,6 +400,7 @@ export default function Locking({ balance }: LockingProps) {
           value={formData.lockDate}
           onChange={handleInputChange}
           className="date-picker-input"
+          required
         />
       </div>
 
@@ -436,23 +474,29 @@ export default function Locking({ balance }: LockingProps) {
           >
             Yearly
           </button>
+          <button
+            type="button"
+            className={`schedule-button ${
+              formData.unlockSchedule === "No Vesting" ? "active" : ""
+            }`}
+            onClick={() =>
+              handleInputChange({
+                target: { name: "unlockSchedule", value: "No Vesting" },
+              } as any)
+            }
+          >
+            No Vesting
+          </button>
         </div>
       </div>
 
       <div className="form-group">
         <div className="input-header">
-          <label htmlFor="cancelAuthority">Who can cancel the contract?</label>
+          <label>Who can cancel the contract?</label>
         </div>
-        <select
-          id="cancelAuthority"
-          name="cancelAuthority"
-          value={formData.cancelAuthority}
-          onChange={handleInputChange}
-          className="full-width-select"
-        >
-          <option value="None">None</option>
-          <option value="Owner">Owner</option>
-        </select>
+        <div className="cancel-authority">
+          <span>No one can cancel this contract</span>
+        </div>
       </div>
 
       <div className="schedule-info">
@@ -478,39 +522,111 @@ export default function Locking({ balance }: LockingProps) {
         </p>
         <p>
           <span>Cancel Authority:</span>
-          <span>{formData.cancelAuthority}</span>
+          <span>None</span>
         </p>
       </div>
 
-      <div className="countdown-section">
-        {formData.lockDate && timeRemaining && (
-          <>
-            <div className="countdown-display">
-              <span>{timeRemaining.days}d </span>
-              <span>{timeRemaining.hours}h </span>
-              <span>{timeRemaining.minutes}m </span>
-              <span>{timeRemaining.seconds}s</span>
-            </div>
-            <div className="total-seconds">
-              {calculateTotalSeconds(timeRemaining).toLocaleString()} seconds
-            </div>
-            <div className="time-conversion">
-              {Object.entries(
-                formatTimeUnits(calculateTotalSeconds(timeRemaining))
-              ).map(([unit, value]) => (
-                <div key={unit} className="conversion-row">
-                  <span className="unit">{unit}:</span>
-                  <span className="value">{value}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+      {!hash && (
+        <button
+          type="submit"
+          className="submit-button"
+          disabled={
+            isPending || !isConnected || !formData.amount || !formData.lockDate
+          }
+        >
+          {isPending ? "Creating Lock..." : "Create Lock"}
+        </button>
+      )}
 
-      <button type="submit" className="submit-button">
-        Create Lock
-      </button>
+      {(hash || isConfirming || isConfirmed) && (
+        <div className="transaction-status">
+          <div className="transaction-steps">
+            <div className={`step ${hash ? "active completed" : ""}`}>
+              <div className="step-indicator">1</div>
+              <div className="step-content">
+                <h4>Transaction Submitted</h4>
+                {hash && (
+                  <div className="transaction-hash">
+                    <span>Hash: </span>
+                    <a
+                      href={`https://xexplorer.neo.org/tx/${hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {hash.slice(0, 6)}...{hash.slice(-4)}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div
+              className={`step ${isConfirming ? "active" : ""} ${
+                isConfirmed ? "completed" : ""
+              }`}
+            >
+              <div className="step-indicator">2</div>
+              <div className="step-content">
+                <h4>Confirming Transaction</h4>
+                {isConfirming && (
+                  <div className="loading-spinner">
+                    <div className="spinner"></div>
+                    <span>Waiting for confirmation...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className={`step ${isConfirmed ? "active completed" : ""}`}>
+              <div className="step-indicator">3</div>
+              <div className="step-content">
+                <h4>Lock Created</h4>
+                {isConfirmed && getLockIdFromReceipt() && (
+                  <div className="lock-details">
+                    <code className="lock-id">
+                      {getLockIdFromReceipt()}
+                      <button
+                        type="button"
+                        className="copy-button-minimal"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const lockId = getLockIdFromReceipt();
+                          if (lockId) {
+                            navigator.clipboard.writeText(lockId);
+                          }
+                        }}
+                        title="Copy Lock ID"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect
+                            x="9"
+                            y="9"
+                            width="13"
+                            height="13"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      </button>
+                    </code>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

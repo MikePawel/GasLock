@@ -260,7 +260,7 @@
 
 .schedule-button {
   flex: 1;
-  min-width: 100px;
+  min-width: 120px;
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -371,4 +371,162 @@
 .form-group select.full-width-select {
   width: 100%;
   display: block;
+}
+
+.transaction-hash {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--background-tertiary);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  word-break: break-all;
+  font-family: monospace;
+  color: var(--primary-color);
+}
+
+.transaction-status {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: var(--background-tertiary);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.transaction-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step {
+  display: flex;
+  gap: 1rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--background-input);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.step.completed .step-indicator {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-dark);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-color);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.transaction-hash {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.transaction-hash a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.transaction-hash a:hover {
+  text-decoration: underline;
+}
+
+.lock-details {
+  margin-top: 0.5rem;
+}
+
+.lock-id {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: monospace;
+  color: var(--primary-color);
+  background: var(--background-input);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+  word-break: break-all;
+}
+
+.copy-button-minimal {
+  background: none;
+  border: none;
+  padding: 4px;
+  margin-left: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.copy-button-minimal:hover {
+  color: var(--primary-color);
+}
+
+.copy-button-minimal svg {
+  width: 14px;
+  height: 14px;
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancel-authority {
+  padding: 0.9rem 1rem;
+  background: var(--background-input);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
 }

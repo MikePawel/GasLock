@@ -3,14 +3,16 @@ import { useAccount, useBalance } from "wagmi";
 import "./Home.css";
 import Locking from "../locking/Locking";
 import Payout from "../payout/Payout";
+import ReadLock from "../readLock/ReadLock";
 import { useState } from "react";
 
-type FormType = "locking" | "payout";
+type FormType = "locking" | "payout" | "readLock";
 
 export const Home = () => {
   const { address, isConnected } = useAccount();
   const { data: balance } = useBalance({
-    address: address,
+    address,
+    watch: true,
   });
   const [activeForm, setActiveForm] = useState<FormType>("locking");
 
@@ -23,12 +25,12 @@ export const Home = () => {
             <ConnectButton />
           ) : (
             <>
-              <div className="wallet-info">
+              {/* <div className="wallet-info">
                 <p>Address: {address}</p>
                 <p>
                   Balance: {balance?.formatted} {balance?.symbol}
                 </p>
-              </div>
+              </div> */}
               <div className="form-toggle">
                 <button
                   className={`toggle-button ${
@@ -46,11 +48,21 @@ export const Home = () => {
                 >
                   Payout
                 </button>
+                <button
+                  className={`toggle-button ${
+                    activeForm === "readLock" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveForm("readLock")}
+                >
+                  Read Lock
+                </button>
               </div>
               {activeForm === "locking" ? (
                 <Locking balance={balance} />
+              ) : activeForm === "payout" ? (
+                <Payout balance={balance} />
               ) : (
-                <Payout />
+                <ReadLock />
               )}
             </>
           )}
