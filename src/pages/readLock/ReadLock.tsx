@@ -1,4 +1,4 @@
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { abi } from "../../assets/abi";
 import { useState, useEffect } from "react";
 import "./ReadLock.css";
@@ -29,17 +29,19 @@ export default function ReadLock() {
   );
   const [addressMatch, setAddressMatch] = useState<string>("");
   const { address } = useAccount();
+  const [invalidLockId, setInvalidLockId] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { data: lockInfoData, refetch } = useReadContract({
     abi,
-    address: "0x936c839F678AAfda8d8e8a0FBEA4b363eF7D9926",
+    address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
     functionName: "getLockInfo",
     args: lockId ? [lockId] : undefined,
   });
 
   const { data: withdrawableData } = useReadContract({
     abi,
-    address: "0x936c839F678AAfda8d8e8a0FBEA4b363eF7D9926",
+    address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
     functionName: "calculateWithdrawableAmount",
     args: lockId ? [lockId] : undefined,
   });
@@ -53,6 +55,7 @@ export default function ReadLock() {
   const handleGetInfo = async () => {
     if (!lockId) return;
 
+    setLoading(true);
     const result = await refetch();
     const data = result.data as [
       string,
@@ -64,6 +67,28 @@ export default function ReadLock() {
       bigint
     ];
     setLockInfo(data);
+
+    if (!data || data[0] === "") {
+      setInvalidLockId(true);
+    } else {
+      setInvalidLockId(false);
+    }
+    setLoading(false);
+  };
+
+  const { data: hash, isPending, writeContract } = useWriteContract();
+
+  const handleWithdraw = async (lockId: string) => {
+    try {
+      await writeContract({
+        address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
+        abi,
+        functionName: "withdraw",
+        args: [lockId],
+      });
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
   };
 
   const calculateTimeRemaining = (unlockTimestamp: number) => {
@@ -153,20 +178,31 @@ export default function ReadLock() {
         </button>
       </div>
 
+      {loading && (
+        <div
+          className="loading-spinner"
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <div className="spinner"></div>
+          <span>Loading...</span>
+        </div>
+      )}
+
       {lockInfo && (
         <div className="lock-info">
           {timeRemaining && (
             <div className="countdown-section">
+              <div className="total-seconds">
+                Time until lockup period is over
+              </div>
               <div className="countdown-display">
                 <span>{timeRemaining.days}d</span>
                 <span>{timeRemaining.hours}h</span>
                 <span>{timeRemaining.minutes}m</span>
                 <span>{timeRemaining.seconds}s</span>
               </div>
-              <div className="total-seconds">
-                {calculateTotalSeconds(timeRemaining).toLocaleString()} seconds
-              </div>
-              <div className="time-conversion">
+
+              {/* <div className="time-conversion">
                 {Object.entries(
                   formatTimeUnits(calculateTotalSeconds(timeRemaining))
                 ).map(([unit, value]) => (
@@ -175,7 +211,8 @@ export default function ReadLock() {
                     <span className="value">{value}</span>
                   </div>
                 ))}
-              </div>
+              </div> */}
+              <div style={{ paddingBottom: "40px" }}></div>
             </div>
           )}
 
@@ -196,7 +233,7 @@ export default function ReadLock() {
             <span>{formatTimestamp(lockInfo[4])}</span>
           </p>
           <p>
-            <span>Schedule Type:</span>
+            <span>Vesting Rate:</span>
             <span>
               {SCHEDULE_MAP[lockInfo[5] as keyof typeof SCHEDULE_MAP]}
             </span>
@@ -216,18 +253,43 @@ export default function ReadLock() {
         </div>
       )}
 
-      {timeRemaining &&
+      {/* {timeRemaining &&
         timeRemaining.days === 0 &&
         timeRemaining.hours === 0 &&
         timeRemaining.minutes === 0 &&
         timeRemaining.seconds === 0 && (
           <div className="address-check">
-            <p>
-              <span>Address Check:</span>
-              <span>{addressMatch}</span>
-            </p>
+            <div className="address-check-content">
+              {addressMatch === "Correct address" && (
+                <>
+                  <p style={{ paddingBottom: "20px" }}>
+                    Withdrawable Amount: {formatGasAmount(withdrawableAmount)}
+                  </p>
+                  <button
+                    className="withdraw-button"
+                    onClick={() => handleWithdraw(lockId)}
+                  >
+                    Withdraw
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        )}
+        )} */}
+      {withdrawableAmount && (
+        <button
+          className="withdraw-button"
+          onClick={() => handleWithdraw(lockId)}
+        >
+          Withdraw
+        </button>
+      )}
+
+      {invalidLockId && (
+        <div className="invalid-lock-id">
+          <p>This lock ID is invalid.</p>
+        </div>
+      )}
     </div>
   );
 }

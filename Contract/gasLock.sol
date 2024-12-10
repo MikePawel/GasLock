@@ -105,72 +105,49 @@ contract GasLock {
     }
     
     function calculateWithdrawableAmount(bytes32 _lockId) public view returns (uint256) {
-        LockInfo memory lock = locks[_lockId];
-        require(lock.creator != address(0), "Lock does not exist");
+    LockInfo memory lock = locks[_lockId];
+    require(lock.creator != address(0), "Lock does not exist");
 
-        if (block.timestamp >= lock.unlockTimestamp){
-            return lock.remainingAmount;
-        }
-        
-        if (lock.remainingAmount == 0) return 0;
+    // Early exit for fully unlocked or exhausted lock
+    if (lock.remainingAmount == 0) return 0;
+    if (block.timestamp >= lock.unlockTimestamp) return lock.remainingAmount;
 
-        uint256 wholeDuration = lock.unlockTimestamp - lock.createdAt; //whole duration
-        
-        uint256 amountOfPeriods = 0;
+    // Calculate whole duration and time unit in seconds
+    uint256 wholeDuration = lock.unlockTimestamp - lock.createdAt;
+    uint256 timeUnit = 0;
 
-        // calculate amount of periods 
-        if (lock.schedule == UnlockSchedule.Hourly) {
-            amountOfPeriods = wholeDuration / 3600;
-        } else if (lock.schedule == UnlockSchedule.Daily) {
-            amountOfPeriods = wholeDuration / 86400;
-        } else if (lock.schedule == UnlockSchedule.Weekly) {
-            amountOfPeriods = wholeDuration / 604800;
-        } else if (lock.schedule == UnlockSchedule.Monthly) {
-            amountOfPeriods = wholeDuration / 259200;
-        } else if (lock.schedule == UnlockSchedule.Yearly) {
-            amountOfPeriods = wholeDuration / 31536000;
-        } else {
-            amountOfPeriods = 1;
-        }
+    if (lock.schedule == UnlockSchedule.Hourly) timeUnit = 3600;
+    else if (lock.schedule == UnlockSchedule.Daily) timeUnit = 86400;
+    else if (lock.schedule == UnlockSchedule.Weekly) timeUnit = 604800;
+    else if (lock.schedule == UnlockSchedule.Monthly) timeUnit = 259200;
+    else if (lock.schedule == UnlockSchedule.Yearly) timeUnit = 31536000;
+    else timeUnit = wholeDuration; // Default for Deadline or other schedules
 
-        if (amountOfPeriods <= 0){
-            return 0;
-        }
-        // calculate amount per period
-        uint256 amountPerPeriod = lock.amount / amountOfPeriods;
+    if (timeUnit == 0 || wholeDuration < timeUnit) return 0;
 
-        // payout per period
-        // uint256 payoutPerPeriod = lock.amount / amountPerPeriod;
+    // Calculate number of periods
+    uint256 amountOfPeriods = wholeDuration / timeUnit;
+    if (amountOfPeriods == 0) return 0;
 
-        
-        // How many periods in time passed?
-        uint256 timeElapsed = block.timestamp - lock.createdAt;
-        uint256 amountOfEligiblePayouts = 0;
+    // Calculate amount per period
+    uint256 amountPerPeriod = lock.amount / amountOfPeriods;
 
-        if (lock.schedule == UnlockSchedule.Hourly) {
-            amountOfEligiblePayouts = timeElapsed / 3600;
-        } else if (lock.schedule == UnlockSchedule.Daily) {
-            amountOfEligiblePayouts = timeElapsed / 86400;
-        } else if (lock.schedule == UnlockSchedule.Weekly) {
-            amountOfEligiblePayouts = timeElapsed / 604800;
-        } else if (lock.schedule == UnlockSchedule.Monthly) {
-            amountOfEligiblePayouts = timeElapsed / 259200;
-        } else if (lock.schedule == UnlockSchedule.Yearly) {
-            amountOfEligiblePayouts = timeElapsed / 31536000;
-        } else {
-            amountOfPeriods = 0;
-        }
+    // Calculate elapsed time and eligible payouts
+    uint256 timeElapsed = block.timestamp - lock.createdAt;
+    uint256 eligiblePeriods = timeElapsed / timeUnit;
 
-        if (amountOfEligiblePayouts == 0){
-            return 0;
-        }
+    // Calculate the total withdrawable amount until now
+    uint256 totalPayoutUntilNow = amountPerPeriod * eligiblePeriods;
 
-        uint256 totalPayoutUntilToday = amountPerPeriod * amountOfEligiblePayouts;
-        if ((lock.amount -lock.remainingAmount) <= totalPayoutUntilToday ){
-            return (totalPayoutUntilToday - (lock.amount -lock.remainingAmount));
-        }
-        return 0;
+    // Calculate what remains to be withdrawn
+    uint256 alreadyWithdrawn = lock.amount - lock.remainingAmount;
+    if (totalPayoutUntilNow > alreadyWithdrawn) {
+        return totalPayoutUntilNow - alreadyWithdrawn;
     }
+
+    return 0;
+}
+
     
     function withdraw(bytes32 _lockId) external {
         LockInfo storage lock = locks[_lockId];

@@ -254,7 +254,7 @@ export default function Payout({ balance }: PayoutProps) {
 
     try {
       await writeContract({
-        address: "0x936c839F678AAfda8d8e8a0FBEA4b363eF7D9926",
+        address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
         abi,
         functionName: "createLock",
         args: [
@@ -436,15 +436,27 @@ export default function Payout({ balance }: PayoutProps) {
           </button>
         </div>
       </div>
+      <div className="form-group">
+        <div className="input-header">
+          <label>Who can cancel the contract?</label>
+        </div>
+        <div className="cancel-authority">
+          <span>No one can cancel this contract</span>
+        </div>
+      </div>
 
       <div className="schedule-info">
         <p>
           <span>Lock Date:</span>
-          <span>{new Date().toLocaleDateString()}</span>
+          <span>{new Date().toLocaleString()}</span>
         </p>
         <p>
           <span>Unlock Date:</span>
-          <span>{formatTimestampToDate(scheduleInfo.unlockDate)}</span>
+          <span>
+            {new Date(
+              parseInt(scheduleInfo.unlockDate) * 1000
+            ).toLocaleString()}
+          </span>
         </p>
         <p>
           <span>Unlock Rate:</span>
@@ -459,6 +471,10 @@ export default function Payout({ balance }: PayoutProps) {
           <span>
             {formData.recipientAddress || "Please enter recipient address"}
           </span>
+        </p>
+        <p>
+          <span>Cancel Authority:</span>
+          <span>None</span>
         </p>
       </div>
 

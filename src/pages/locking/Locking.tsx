@@ -181,7 +181,7 @@ export default function Locking({
 
     try {
       await writeContract({
-        address: "0x936c839F678AAfda8d8e8a0FBEA4b363eF7D9926",
+        address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
         abi,
         functionName: "createLock",
         args: [BigInt(unlockTimestamp), scheduleNumber, address],
@@ -286,7 +286,7 @@ export default function Locking({
   const formatTimestampToDate = (timestamp: string) => {
     if (!timestamp) return "-";
     const date = new Date(parseInt(timestamp) * 1000);
-    return date.toLocaleDateString();
+    return date.toLocaleString();
   };
 
   // Extract lock ID from receipt logs
@@ -501,12 +501,8 @@ export default function Locking({
 
       <div className="schedule-info">
         <p>
-          <span>Lock Title:</span>
-          <span>{formData.lockTitle || "-"}</span>
-        </p>
-        <p>
           <span>Lock Date:</span>
-          <span>{new Date().toLocaleDateString()}</span>
+          <span>{new Date().toLocaleString()}</span>
         </p>
         <p>
           <span>Unlock Date:</span>
