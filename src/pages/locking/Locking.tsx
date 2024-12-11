@@ -368,7 +368,9 @@ export default function Locking({
         <button
           type="button"
           className="date-picker-button"
-          onClick={handleDateButtonClick}
+          onClick={() => {
+            datePickerRef.current?.showPicker();
+          }}
         >
           <span>{formatDateForDisplay(formData.lockDate)}</span>
           <svg

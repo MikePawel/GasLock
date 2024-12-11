@@ -249,7 +249,9 @@
 
 /* Hide the actual date input */
 .date-picker-input {
-  display: none;
+  visibility: hidden;
+  width: 1px;
+  height: 1px;
 }
 
 .unlock-schedule-buttons {
@@ -564,4 +566,11 @@
   .balance {
     font-size: 12px;
   }
+}
+
+/* Assuming the parent container is .date-picker-container */
+.date-picker-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
 }
