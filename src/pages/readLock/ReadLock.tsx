@@ -33,7 +33,7 @@ export default function ReadLock() {
     null
   );
   const [, setAddressMatch] = useState<string>("");
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const [invalidLockId, setInvalidLockId] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shouldFetchWithdrawable, setShouldFetchWithdrawable] = useState(false);
@@ -282,7 +282,7 @@ export default function ReadLock() {
         </div>
       )}
 
-      {withdrawableAmount && lockInfo[1] === address && (
+      {isConnected && withdrawableAmount && lockInfo[1] === address && (
         <>
           <button
             className="withdraw-button"
