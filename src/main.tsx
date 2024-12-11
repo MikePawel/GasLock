@@ -29,9 +29,9 @@ export const neoX = {
 
 const config = getDefaultConfig({
   appName: "My RainbowKit App",
-  projectId: "YOUR_PROJECT_ID",
+  projectId: import.meta.env.VITE_PROJECT_ID,
   chains: [neoX],
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  ssr: true,
 });
 
 const queryClient = new QueryClient();
