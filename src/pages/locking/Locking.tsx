@@ -367,9 +367,11 @@ export default function Locking({
           <DatePicker
             selected={new Date(formData.lockDate)}
             onChange={(date) => {
+              const updatedDate = new Date(date);
+              updatedDate.setHours(updatedDate.getHours() + 1);
               setFormData((prev) => ({
                 ...prev,
-                lockDate: date?.toISOString().slice(0, 16) || "",
+                lockDate: updatedDate.toISOString().slice(0, 16),
               }));
             }}
             showTimeSelect
