@@ -574,3 +574,15 @@
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
 }
+
+.full-width-datepicker {
+  width: 100%; /* Make the DatePicker full width */
+  border: 1px solid var(--border-color); /* Match the border style */
+  border-radius: 8px; /* Match the border radius */
+  padding: 0.9rem 1rem; /* Match the padding */
+  background: var(--background-input); /* Match the background */
+  color: var(--text-primary); /* Match the text color */
+  font-size: 0.95rem; /* Match the font size */
+  transition: all 0.2s ease; /* Match the transition */
+  box-shadow: var(--input-shadow); /* Match the box shadow */
+}
