@@ -48,42 +48,44 @@ export const Home = () => {
             : "Get Lock ID Information"}
         </h1>
         <div className="connect-section">
+          <div className="form-toggle">
+            <button
+              className={`toggle-button ${
+                activeForm === "locking" ? "active" : ""
+              }`}
+              onClick={() => setActiveForm("locking")}
+            >
+              Locking
+            </button>
+            <button
+              className={`toggle-button ${
+                activeForm === "payout" ? "active" : ""
+              }`}
+              onClick={() => setActiveForm("payout")}
+            >
+              Payout
+            </button>
+            <button
+              className={`toggle-button ${
+                activeForm === "readLock" ? "active" : ""
+              }`}
+              onClick={() => setActiveForm("readLock")}
+            >
+              Read Lock
+            </button>
+          </div>
           {!isConnected ? (
-            <ConnectButton />
+            <>
+              {activeForm === "readLock" ? (
+                <ReadLock />
+              ) : (
+                <>
+                  <ConnectButton />
+                </>
+              )}
+            </>
           ) : (
             <>
-              {/* <div className="wallet-info">
-                <p>Address: {address}</p>
-                <p>
-                  Balance: {balance?.formatted} {balance?.symbol}
-                </p>
-              </div> */}
-              <div className="form-toggle">
-                <button
-                  className={`toggle-button ${
-                    activeForm === "locking" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveForm("locking")}
-                >
-                  Locking
-                </button>
-                <button
-                  className={`toggle-button ${
-                    activeForm === "payout" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveForm("payout")}
-                >
-                  Payout
-                </button>
-                <button
-                  className={`toggle-button ${
-                    activeForm === "readLock" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveForm("readLock")}
-                >
-                  Read Lock
-                </button>
-              </div>
               {activeForm === "locking" ? (
                 <Locking balance={balance} />
               ) : activeForm === "payout" ? (
