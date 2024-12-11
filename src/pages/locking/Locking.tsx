@@ -196,10 +196,6 @@ export default function Locking({
     }
   };
 
-  const handleDateButtonClick = () => {
-    datePickerRef.current?.showPicker();
-  };
-
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return "Select Date";
     const date = new Date(dateString);
