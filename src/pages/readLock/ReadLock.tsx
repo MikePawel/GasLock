@@ -7,6 +7,7 @@ import {
 import { abi } from "../../assets/abi";
 import { useState, useEffect } from "react";
 import "./ReadLock.css";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type TimeRemaining = {
   days: number;
@@ -31,13 +32,24 @@ export default function ReadLock() {
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining | null>(
     null
   );
-  const [addressMatch, setAddressMatch] = useState<string>("");
+  const [, setAddressMatch] = useState<string>("");
   const { address } = useAccount();
   const [invalidLockId, setInvalidLockId] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shouldFetchWithdrawable, setShouldFetchWithdrawable] = useState(false);
 
-  const { data: lockInfoData, refetch: refetchLockInfo } = useReadContract({
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const idFromUrl = params.get("lockId");
+    if (idFromUrl) {
+      setLockId(idFromUrl);
+    }
+  }, [location.search]);
+
+  const { refetch: refetchLockInfo } = useReadContract({
     abi,
     address: "0xa071891F15A4c76E3788cd373eB0B17621Eceb41",
     functionName: "getLockInfo",
@@ -60,6 +72,9 @@ export default function ReadLock() {
 
   const handleGetInfo = async () => {
     if (!lockId) return;
+
+    navigate(`?lockId=${lockId}&active=readLock`);
+    setShouldFetchWithdrawable(true);
 
     setLoading(true);
     const lockInfoResult = await refetchLockInfo();
@@ -89,11 +104,10 @@ export default function ReadLock() {
       setInvalidLockId(false);
     }
 
-    setShouldFetchWithdrawable(true);
     setLoading(false);
   };
 
-  const { data: hash, isPending, writeContract } = useWriteContract();
+  const { data: hash, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
@@ -166,15 +180,6 @@ export default function ReadLock() {
     }
   }, [lockInfo, address]);
 
-  const calculateTotalSeconds = (timeRemaining: TimeRemaining) => {
-    return (
-      timeRemaining.days * 24 * 60 * 60 +
-      timeRemaining.hours * 60 * 60 +
-      timeRemaining.minutes * 60 +
-      timeRemaining.seconds
-    );
-  };
-
   const formatTimestamp = (timestamp: bigint) => {
     return new Date(Number(timestamp) * 1000).toLocaleString();
   };
@@ -238,7 +243,11 @@ export default function ReadLock() {
 
           <p>
             <span>Recipient:</span>
-            <span>{lockInfo[1]}</span>
+            <span>
+              {window.innerWidth <= 480
+                ? `${lockInfo[1].slice(0, 4)}...${lockInfo[1].slice(-4)}`
+                : lockInfo[1]}
+            </span>
           </p>
           <p>
             <span>Total Amount locked:</span>
@@ -273,36 +282,15 @@ export default function ReadLock() {
         </div>
       )}
 
-      {/* {timeRemaining &&
-        timeRemaining.days === 0 &&
-        timeRemaining.hours === 0 &&
-        timeRemaining.minutes === 0 &&
-        timeRemaining.seconds === 0 && (
-          <div className="address-check">
-            <div className="address-check-content">
-              {addressMatch === "Correct address" && (
-                <>
-                  <p style={{ paddingBottom: "20px" }}>
-                    Withdrawable Amount: {formatGasAmount(withdrawableAmount)}
-                  </p>
-                  <button
-                    className="withdraw-button"
-                    onClick={() => handleWithdraw(lockId)}
-                  >
-                    Withdraw
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )} */}
-      {withdrawableAmount && (
-        <button
-          className="withdraw-button"
-          onClick={() => handleWithdraw(lockId)}
-        >
-          Withdraw
-        </button>
+      {withdrawableAmount && lockInfo[1] === address && (
+        <>
+          <button
+            className="withdraw-button"
+            onClick={() => handleWithdraw(lockId)}
+          >
+            Withdraw
+          </button>
+        </>
       )}
 
       {hash && (
@@ -331,10 +319,20 @@ export default function ReadLock() {
               }`}
             >
               <div className="step-indicator">2</div>
-              <div className="step-content">
+              <div
+                className="step-content"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <h4>Confirming Transaction</h4>
                 {isConfirming && (
-                  <div className="loading-spinner">
+                  <div
+                    className="loading-spinner"
+                    style={{ paddingTop: "10px" }}
+                  >
                     <div className="spinner"></div>
                     <span>Waiting for confirmation...</span>
                   </div>

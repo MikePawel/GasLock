@@ -6,7 +6,6 @@ import {
 } from "wagmi";
 import { abi } from "../../assets/abi";
 import "./Payout.css";
-import { formatTimeUnits } from "../../utils/timeUtils";
 
 interface PayoutFormData {
   amount: string;
@@ -203,12 +202,6 @@ export default function Payout({ balance }: PayoutProps) {
     });
   };
 
-  const formatTimestampToDate = (timestamp: string) => {
-    if (!timestamp) return "-";
-    const date = new Date(parseInt(timestamp) * 1000);
-    return date.toLocaleDateString();
-  };
-
   // Add useEffect for updating scheduleInfo
   useEffect(() => {
     if (formData.amount) {
@@ -264,6 +257,9 @@ export default function Payout({ balance }: PayoutProps) {
         ],
         value: BigInt(parseFloat(formData.amount) * 1e18),
       });
+
+      // Add navigation to update URL
+      window.history.pushState({}, "", "?active=payout");
     } catch (error) {
       console.error("Transaction failed:", error);
     }

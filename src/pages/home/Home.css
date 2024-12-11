@@ -83,3 +83,72 @@
   --primary-color: #0be7a3;
   --primary-color-hover: #09c68c;
 }
+
+@media (max-width: 768px) {
+  .locking-form,
+  .read-lock-container,
+  .payout-form {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .schedule-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .transaction-status {
+    font-size: 14px;
+  }
+
+  .form-toggle {
+    padding: 0.3rem;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+  }
+
+  .toggle-button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    width: calc(33.33% - 0.2rem);
+    margin-bottom: 0;
+  }
+
+  .container {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .title {
+    padding-top: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .locking-form,
+  .read-lock-container,
+  .payout-form {
+    font-size: 14px;
+  }
+
+  .input-header label {
+    font-size: 12px;
+  }
+
+  .balance {
+    font-size: 12px;
+  }
+
+  .toggle-button {
+    font-size: 0.7rem;
+    width: calc(33.33% - 0.1rem);
+  }
+}

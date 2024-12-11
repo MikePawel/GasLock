@@ -157,8 +157,76 @@ button:active:not(:disabled) {
 
 @media (max-width: 768px) {
   .read-lock-container {
-    width: 95%;
-    padding: 2rem 1.5rem;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .input-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lock-id-input {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .lock-info {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .countdown-display {
+    font-size: 1.2rem;
+  }
+
+  button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .read-lock-container {
+    font-size: 14px;
+  }
+
+  .lock-info span {
+    font-size: 12px;
+  }
+
+  .lock-id-input {
+    font-size: 0.8rem;
+  }
+
+  .lock-info p {
+    font-size: 0.8rem;
+  }
+
+  .countdown-display {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+  }
+
+  .countdown-display span {
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .countdown-display {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+  }
+
+  .countdown-display span {
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+    padding: 10px;
   }
 }
 
@@ -166,4 +234,35 @@ button:active:not(:disabled) {
   margin-top: 20px;
   font-size: 1rem;
   color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .read-lock-container {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .lock-info {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .withdraw-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .transaction-status {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .read-lock-container {
+    font-size: 14px;
+  }
+
+  .lock-info span {
+    font-size: 12px;
+  }
 }

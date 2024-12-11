@@ -6,6 +6,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { abi } from "../../assets/abi";
+import { useNavigate } from "react-router-dom";
 
 interface LockingFormData {
   amount: string;
@@ -45,6 +46,8 @@ const SCHEDULE_TO_NUMBER = {
 export default function Locking({
   balance,
 }: LockingProps & { address?: string }) {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<LockingFormData>({
     amount: "",
     lockDate: new Date().toISOString().slice(0, 16),
@@ -100,33 +103,33 @@ export default function Locking({
     switch (formData.unlockSchedule) {
       case "Hourly":
         if (totalSeconds <= 3600) {
-          return `${amount.toFixed(2)} GAS/hour`;
+          return `${amount.toFixed(4)} GAS/hour`;
         }
-        return `${(amount / (totalSeconds / 3600)).toFixed(2)} GAS/hour`;
+        return `${(amount / (totalSeconds / 3600)).toFixed(4)} GAS/hour`;
 
       case "Daily":
         if (totalSeconds <= 86400) {
-          return `${amount.toFixed(2)} GAS/day`;
+          return `${amount.toFixed(4)} GAS/day`;
         }
-        return `${(amount / (totalSeconds / 86400)).toFixed(2)} GAS/day`;
+        return `${(amount / (totalSeconds / 86400)).toFixed(4)} GAS/day`;
 
       case "Weekly":
         if (totalSeconds / 86400 <= 7) {
-          return `${amount.toFixed(2)} GAS/week`;
+          return `${amount.toFixed(4)} GAS/week`;
         }
-        return `${(amount / (totalSeconds / 604800)).toFixed(2)} GAS/week`;
+        return `${(amount / (totalSeconds / 604800)).toFixed(4)} GAS/week`;
 
       case "Monthly":
         if (totalSeconds / 86400 <= 30) {
-          return `${amount.toFixed(2)} GAS/month`;
+          return `${amount.toFixed(4)} GAS/month`;
         }
-        return `${(amount / (totalSeconds / 2592000)).toFixed(2)} GAS/month`;
+        return `${(amount / (totalSeconds / 2592000)).toFixed(4)} GAS/month`;
 
       case "Yearly":
         if (totalSeconds / 86400 <= 365) {
-          return `${amount.toFixed(2)} GAS/year`;
+          return `${amount.toFixed(4)} GAS/year`;
         }
-        return `${(amount / (totalSeconds / 31536000)).toFixed(2)} GAS/year`;
+        return `${(amount / (totalSeconds / 31536000)).toFixed(4)} GAS/year`;
 
       default:
         return "-";
@@ -144,7 +147,6 @@ export default function Locking({
 
       if (formData.lockDate && formData.unlockSchedule) {
         // Current timestamp for lock date
-        const lockTimestamp = Math.floor(Date.now() / 1000);
 
         // Selected date for unlock date
         const unlockTimestamp = Math.floor(
@@ -187,6 +189,8 @@ export default function Locking({
         args: [BigInt(unlockTimestamp), scheduleNumber, address],
         value: BigInt(parseFloat(formData.amount) * 1e18),
       });
+
+      navigate("/?active=locking");
     } catch (error) {
       console.error("Transaction failed:", error);
     }
@@ -263,25 +267,6 @@ export default function Locking({
     );
   };
 
-  // Add this helper function to convert seconds to different time units
-  const formatTimeUnits = (totalSeconds: number) => {
-    const minutes = totalSeconds / 60;
-    const hours = minutes / 60;
-    const days = hours / 24;
-    const weeks = days / 7;
-    const months = days / 30;
-    const years = days / 365;
-
-    return {
-      minutes: minutes.toFixed(2),
-      hours: hours.toFixed(2),
-      days: days.toFixed(2),
-      weeks: weeks.toFixed(2),
-      months: months.toFixed(2),
-      years: years.toFixed(2),
-    };
-  };
-
   // Add this helper function to convert timestamp to date string
   const formatTimestampToDate = (timestamp: string) => {
     if (!timestamp) return "-";
@@ -305,7 +290,12 @@ export default function Locking({
 
       // Get the first log which contains our event
       const lockCreatedLog = receipt.logs[0];
-      if (lockCreatedLog) {
+      if (
+        lockCreatedLog &&
+        lockCreatedLog.topics[1] &&
+        lockCreatedLog.topics[2] &&
+        lockCreatedLog.topics[3]
+      ) {
         const lockId = lockCreatedLog.topics[1];
         const creator = `0x${lockCreatedLog.topics[2].slice(26)}`;
         const recipient = `0x${lockCreatedLog.topics[3].slice(26)}`;
@@ -350,7 +340,12 @@ export default function Locking({
         <div className="input-header">
           <label htmlFor="amount">Lock Amount</label>
           <span className="balance">
-            Balance: {balance?.formatted || "0"} {balance?.symbol || "GAS"}
+            Balance:{" "}
+            {balance?.formatted
+              ? `${Number(balance.formatted).toFixed(4)} ${
+                  balance.symbol || "GAS"
+                }`
+              : "0 GAS"}
           </span>
         </div>
         <input
@@ -562,10 +557,20 @@ export default function Locking({
               }`}
             >
               <div className="step-indicator">2</div>
-              <div className="step-content">
+              <div
+                className="step-content"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <h4>Confirming Transaction</h4>
                 {isConfirming && (
-                  <div className="loading-spinner">
+                  <div
+                    className="loading-spinner"
+                    style={{ paddingTop: "10px" }}
+                  >
                     <div className="spinner"></div>
                     <span>Waiting for confirmation...</span>
                   </div>

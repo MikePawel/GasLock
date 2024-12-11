@@ -530,3 +530,38 @@
   color: var(--text-secondary);
   font-size: 0.95rem;
 }
+
+@media (max-width: 768px) {
+  .locking-form {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .schedule-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .transaction-status {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .locking-form {
+    font-size: 14px;
+  }
+
+  .input-header label {
+    font-size: 12px;
+  }
+
+  .balance {
+    font-size: 12px;
+  }
+}
