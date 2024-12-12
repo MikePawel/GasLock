@@ -1,51 +1,56 @@
-# React + TypeScript + Vite
+# Grind Hackathon Submission for NEO X
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Name: **GasLock**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Description
 
-## Expanding the ESLint configuration
+GasLock is a decentralized application deployed on the NEO X Blockchain. It allows users to lock and vest GAS tokens with smart contract security and transparency. The key functionalities include:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 1\. **GAS Locking**
 
-- Configure the top-level `parserOptions` property like this:
+- Users can deposit any amount of GAS into the smart contract and lock it for a predefined period.
+- The locked funds cannot be redeemed earlier or manipulated by anyone, ensuring absolute security.
+- Designed for users who wish to enforce "forced diamond hands," e.g., locking GAS for a year to achieve tax-free status in countries like Germany.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### 2\. **Vesting Schedule Creation**
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+- Users can create a vesting schedule to distribute a specified amount of GAS tokens to a recipient over time.
+- Vesting options include hourly, daily, weekly, monthly, or yearly intervals, ending at the specified deadline.
+- Ideal for scenarios such as payroll management, contract-based payments, or structured disbursement of funds.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+---
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
-# GasLock
+## Key Features
+
+- **Immutable and Transparent:** The smart contract is verified and deployed on the NEO X Blockchain, making the logic visible to anyone, enhancing trust.
+- **Traceable Transactions:** Upon successful transactions, users receive a transaction hash and a unique lock ID for tracking.
+- **Data Transparency:** The lock ID stores all the necessary data about the transaction and can be viewed publicly under the "Read Lock" tab.
+
+---
+
+## Official Website
+
+[Visit Official Website Here](officialWebsite)
+
+## Demo Video
+
+[Watch Demo Video Here](demoVideo)
+
+---
+
+## How It Works
+
+1.  **Deposit GAS:**
+    - Users deposit GAS into the smart contract and specify the lock duration or vesting schedule under the "Locking" or "Payout" tab.
+2.  **Transaction Hash & Receipt:**
+    - Users receive a transaction hash to trace the transaction and a receipt containing a unique lock ID.
+3.  **Read Lock Data:**
+    - The lock ID can be used to view all transaction specifications under the "Read Lock" tab.
+
+---
+
+## Security and Transparency
+
+GasLock leverages the NEO X Blockchain's robust infrastructure to ensure that funds are secure, and the contract logic is immutable and auditable. This level of transparency fosters trust among users and stakeholders.

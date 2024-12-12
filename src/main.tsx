@@ -49,6 +49,7 @@ createRoot(document.getElementById("root")!).render(
             overlayBlur: "small",
           })}
           initialChain={47763}
+          locale="en-US"
         >
           <App />
         </RainbowKitProvider>
