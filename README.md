@@ -10,7 +10,7 @@
 
 ## Demo Video
 
-[Watch Demo Video Here](https://youtu.be/B1ZVoWPEJ-M)
+[Watch Demo Video Here](demoVideo)
 
 ---
 
@@ -48,6 +48,56 @@ GasLock is a decentralized application deployed on the NEO X Blockchain. It allo
     - Users receive a transaction hash to trace the transaction and a receipt containing a unique lock ID.
 3.  **Read Lock Data:**
     - The lock ID can be used to view all transaction specifications under the "Read Lock" tab.
+
+---
+
+## Potential Use Cases
+
+### GAS Locking:
+
+- **Forced Diamond Hands:**
+  - Individuals can use GasLock to enforce "forced diamond hands," locking their GAS tokens for a specific period. For example, locking tokens for a year to benefit from tax advantages in certain jurisdictions (e.g., Germany).
+- **Building Trust in Communities:**
+  - Community organizers or project teams can lock their tokens for a specified period, making the lock visible to everyone. This demonstrates their commitment and builds trust within their community.
+
+### Vesting Schedule:
+
+- **Transparent Employee Payments:**
+  - Employers can use GasLock to set up a transparent and structured vesting schedule for distributing payroll to employees. Payments are made at regular intervals, ensuring fairness and transparency.
+- **Self-Control Mechanisms:**
+  - Individuals can use GasLock to manage their finances responsibly. For example, after a lottery win or receiving a large sum, they can lock tokens for 10, 20, or 30 years and vest them monthly to avoid spending all the money at once.
+- **Controlled Fund Distribution:**
+  - GasLock can also be used for distributing funds in contracts or grants over time, ensuring recipients receive payments in a controlled and predictable manner.
+
+---
+
+## How to Deploy Locally
+
+To deploy GasLock locally, follow these steps:
+
+**Clone the repository:**
+
+```
+git clone https://github.com/MikePawel/GasLock
+```
+
+**Navigate to the project directory:**
+
+```
+cd <repository-directory>
+```
+
+**Install dependencies:**
+
+```
+npm install
+```
+
+**Run the development server:**
+
+```
+npm run dev
+```
 
 ---
 
