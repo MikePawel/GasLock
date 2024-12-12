@@ -4,6 +4,16 @@
 
 ---
 
+## Official Website
+
+[Visit Official Website Here](officialWebsite)
+
+## Demo Video
+
+[Watch Demo Video Here](demoVideo)
+
+---
+
 ## Description
 
 GasLock is a decentralized application deployed on the NEO X Blockchain. It allows users to lock and vest GAS tokens with smart contract security and transparency. The key functionalities include:
@@ -27,16 +37,6 @@ GasLock is a decentralized application deployed on the NEO X Blockchain. It allo
 - **Immutable and Transparent:** The smart contract is verified and deployed on the NEO X Blockchain, making the logic visible to anyone, enhancing trust.
 - **Traceable Transactions:** Upon successful transactions, users receive a transaction hash and a unique lock ID for tracking.
 - **Data Transparency:** The lock ID stores all the necessary data about the transaction and can be viewed publicly under the "Read Lock" tab.
-
----
-
-## Official Website
-
-[Visit Official Website Here](officialWebsite)
-
-## Demo Video
-
-[Watch Demo Video Here](demoVideo)
 
 ---
 
