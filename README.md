@@ -6,7 +6,7 @@
 
 ## Official Website
 
-[Visit Official Website Here](officialWebsite)
+[Visit Official Website Here](https://gaslock.netlify.app/)
 
 ## Demo Video
 
