@@ -267,6 +267,17 @@ export default function Payout({ balance }: PayoutProps) {
     }
   };
 
+  // New useEffect for scrolling
+  useEffect(() => {
+    if (hash || isConfirming || isConfirmed) {
+      // Scroll to the bottom of the page when transaction status is displayed
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [hash, isConfirming, isConfirmed]);
+
   return (
     <form className="locking-form" onSubmit={handleSubmit}>
       <div className="form-group">
@@ -539,7 +550,14 @@ export default function Payout({ balance }: PayoutProps) {
               }`}
             >
               <div className="step-indicator">2</div>
-              <div className="step-content">
+              <div
+                className="step-content"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <h4>Confirming Transaction</h4>
                 {isConfirming && (
                   <div className="loading-spinner">

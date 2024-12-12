@@ -125,6 +125,15 @@ export default function ReadLock() {
     }
   };
 
+  useEffect(() => {
+    if (hash || isConfirming || isConfirmed) {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [hash, isConfirming, isConfirmed]);
+
   const calculateTimeRemaining = (unlockTimestamp: number) => {
     const now = Date.now();
     const unlockTime = unlockTimestamp * 1000;

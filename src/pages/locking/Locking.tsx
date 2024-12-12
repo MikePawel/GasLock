@@ -281,10 +281,18 @@ export default function Locking({
     return lockCreatedLog?.topics[1] || null;
   };
 
+  const transactionStatusRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (isConfirmed && receipt) {
       console.log("Transaction confirmed!");
       console.log("Transaction receipt:", receipt);
+
+      // Scroll to the bottom of the page
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
 
       // Get the first log which contains our event
       const lockCreatedLog = receipt.logs[0];
@@ -331,6 +339,16 @@ export default function Locking({
       }
     }
   }, [isConfirmed, receipt]);
+
+  useEffect(() => {
+    if (hash || isConfirming || isConfirmed) {
+      // Scroll to the bottom of the page when transaction status is displayed
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [hash, isConfirming, isConfirmed]);
 
   return (
     <form className="locking-form" onSubmit={handleSubmit}>
@@ -549,7 +567,7 @@ export default function Locking({
       )}
 
       {(hash || isConfirming || isConfirmed) && (
-        <div className="transaction-status">
+        <div className="transaction-status" ref={transactionStatusRef}>
           <div className="transaction-steps">
             <div className={`step ${hash ? "active completed" : ""}`}>
               <div className="step-indicator">1</div>
